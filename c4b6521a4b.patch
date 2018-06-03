@@ -1,0 +1,76 @@
+From c4b6521a4b82e639f6ed776abad79c86e959b27a Mon Sep 17 00:00:00 2001
+From: Sitaram Chamarty <sitaram@atc.tcs.com>
+Date: Fri, 13 Oct 2017 15:51:58 +0530
+Subject: [PATCH] allow orphan gl-conf files (see below for details)
+
+Background:
+
+    For explicitly named repos in gitolite.conf ("repo foo bar" as
+    opposed to "repo @group-name" or "repo [a-z].*"), the compiled rules
+    are placed in a file called "gl-conf" in the repo's directory.
+
+    In addition, an entry is made in a hash called "split_conf" in the
+    main compiled conf file (~/.gitolite/conf/gitolite.conf-compiled.pm).
+
+    The crucial bit is this: if a repo does not have an entry in the
+    split_conf hash, its gl-conf file will not be honored.
+
+    Why is this?  Because there are situations where that file may be
+    out of date, and the rules within should not be in effect.  For a
+    simple example, consider this conf
+
+        repo seven
+            RW+ =   u1
+            RW  =   u2
+
+    Now, management decides that "seven" needs to be assimilated into a
+    large group called "borg":
+
+        # add seven to borg
+        @borg = seven
+
+        # seven's rules are now deleted
+
+    When you make this change and push, users u1 and u2 should not get
+    access (unless the rules for @borg happened to allow them).  That
+    is, the gl-conf in the repo-dir is considered an orphan, and must
+    not be included in rule processing.
+
+    Since there is now no "seven" entry in split_conf, this is exactly
+    what happens -- gl-conf is ignored.
+
+    (Note: one might argue that gitolite compile should go and delete
+    these orphaned gl-conf files, but that's yet another "full disk
+    scan" overhead.)
+
+What this patch does:
+
+    This patch allows an admin to override this safety feature, and say,
+    in effect, "include orphaned gl-conf files in the rule processing; I
+    know what I am doing".  The admin enables that by adding an rc
+    variable called ALLOW_ORPHAN_GL_CONF and setting it to "1".
+
+How does this help:
+
+    This wouldn't be useful without some way of updating an individual
+    repo's rules directly into its gl-conf file.
+
+    contrib/commands/compile-1 does exactly that (see notes within that
+    file for information, assumptions, warnings, etc.)
+---
+ src/lib/Gitolite/Conf/Load.pm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/lib/Gitolite/Conf/Load.pm b/src/lib/Gitolite/Conf/Load.pm
+index d0cd985ca..e0e4e9247 100644
+--- a/src/lib/Gitolite/Conf/Load.pm
++++ b/src/lib/Gitolite/Conf/Load.pm
+@@ -305,7 +305,7 @@ sub load_1 {
+     }
+ 
+     if ( -f "gl-conf" ) {
+-        return if not $split_conf{$repo};
++        return if not $split_conf{$repo} and not $rc{ALLOW_ORPHAN_GL_CONF};
+ 
+         my $cc = "./gl-conf";
+         _die "parse '$cc' failed: " . ( $@ or $! ) unless do $cc;
