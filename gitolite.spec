@@ -4,7 +4,7 @@
 Name:           gitolite
 Summary:        Git hosting tool
 Version:        3.6.7
-Release:        1
+Release:        2
 License:        GPLv2
 Group:          Development/Other
 URL:            http://sitaramc.github.com/gitolite/
