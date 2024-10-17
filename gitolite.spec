@@ -7,7 +7,7 @@ Version:        3.6.7
 Release:        3
 License:        GPLv2
 Group:          Development/Other
-URL:            http://sitaramc.github.com/gitolite/
+URL:            https://sitaramc.github.com/gitolite/
 Source0:        https://github.com/sitaramc/gitolite/archive/v%{version}/%{name}-%{version}.tar.gz
 # Upstream: https://github.com/sitaramc/gitolite/commit/c656af01b73a5cc4f80512
 Source1:        compile-1
