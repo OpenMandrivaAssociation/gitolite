@@ -3,8 +3,8 @@
 
 Name:           gitolite
 Summary:        Git hosting tool
-Version:        3.6.7
-Release:        3
+Version:        3.6.14
+Release:        1
 License:        GPLv2
 Group:          Development/Other
 URL:            https://sitaramc.github.com/gitolite/
@@ -14,9 +14,9 @@ Source1:        compile-1
 # From Fedora: https://src.fedoraproject.org/rpms/gitolite3/blob/master/f/gitolite3-README-fedora
 Source2:        gitolite-README-fedora
 # From upstream: reduce stat() and other expensive calls on large installs
-Patch0:         https://github.com/sitaramc/gitolite/commit/41b7885b77.patch
+# dropped (no longer applies): Patch0:         https://github.com/sitaramc/gitolite/commit/41b7885b77.patch
 # From upstream: allow orphan gl-conf files
-Patch1:         https://github.com/sitaramc/gitolite/commit/c4b6521a4b.patch
+# dropped (no longer applies): Patch1:         https://github.com/sitaramc/gitolite/commit/c4b6521a4b.patch
 
 # For rpm-helper macros
 BuildRequires:  rpm-helper
