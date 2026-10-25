@@ -18,6 +18,9 @@ Source2:        gitolite-README-fedora
 # From upstream: allow orphan gl-conf files
 # dropped (no longer applies): Patch1:         https://github.com/sitaramc/gitolite/commit/c4b6521a4b.patch
 
+# Cache.pm loads Redis only when rc CACHE is set. perl-Redis is not packaged.
+%global __requires_exclude %{?__requires_exclude:%{__requires_exclude}|}^perl\\(Redis\\)$
+
 # For rpm-helper macros
 BuildRequires:  rpm-helper
 
@@ -59,6 +62,13 @@ ln -sr %{buildroot}%{gl_datadir}/gitolite %{buildroot}%{_bindir}/gitolite
 # empty authorized_keys file
 touch %{buildroot}%{gl_homedir}/.ssh/authorized_keys
 
+# user(gitolite) and group(gitolite) come from this file. %pre still
+# creates them for the homedir before the file trigger runs.
+mkdir -p %{buildroot}%{_sysusersdir}
+cat >%{buildroot}%{_sysusersdir}/%{name}.conf <<'EOF'
+u %{name} - "gitolite" %{gl_homedir} /bin/sh
+EOF
+
 %pre
 %_pre_useradd %{name} %{gl_homedir} /bin/sh
 
@@ -73,6 +83,7 @@ touch %{buildroot}%{gl_homedir}/.ssh/authorized_keys
 %{_bindir}/convert-gitosis-conf
 %{perl_vendorlib}/*
 %{gl_datadir}
+%{_sysusersdir}/%{name}.conf
 # Make homedir non-world readable
 %attr(750,%{name},%{name}) %dir %{gl_homedir}
 %attr(750,%{name},%{name}) %dir %{gl_homedir}/.ssh
