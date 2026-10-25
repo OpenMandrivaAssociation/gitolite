@@ -3,7 +3,7 @@
 
 Name:           gitolite
 Summary:        Git hosting tool
-Version:        3.6.14
+Version:        3.6.15
 Release:        1
 License:        GPLv2
 Group:          Development/Other
